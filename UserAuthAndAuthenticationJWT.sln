@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserAuthenticationJWT", "UserAuthenticationJWT.csproj", "{1A95842B-3AF7-42B1-9080-EB90D243F90C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserAuthAndAuthenticationJWT", "UserAuthAndAuthenticationJWT.csproj", "{1A95842B-3AF7-42B1-9080-EB90D243F90C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
