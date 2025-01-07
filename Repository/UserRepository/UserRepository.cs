@@ -1,5 +1,5 @@
-using UserAuthenticationJWT.Repository;
-using UserAuthenticationJWT.Model;
+using UserAuthAndAuthenticationJWT.Repository.UserRepository;
+using UserAuthAndAuthenticationJWT.Models;
 
 public class UserRepository: IUserRepository
 {
@@ -37,7 +37,7 @@ public class UserRepository: IUserRepository
         }
     }
 
-    public async Task<User> GetById(int userId)
+    public async Task<User> GetBy(int userId)
     {
         try
         {
@@ -50,6 +50,40 @@ public class UserRepository: IUserRepository
                 {
                     userData = connection.ReadLine().Split(';');
                     if(Convert.ToInt32(userData[1]) == userId)
+                    {
+                        var user = new User{
+                            Email = userData[0],
+                            Id = int.Parse(userData[1]),
+                            FirstName = userData[2],
+                            LastName = userData[3]
+                        };
+
+                        return user;
+                    }
+                }
+            }
+
+            return null;
+        }
+        catch(FileNotFoundException)
+        {
+            throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
+        }
+    }
+
+    public async Task<User> GetBy(string email)
+    {
+        try
+        {
+            string[] userData;
+
+            using(StreamReader connection = new StreamReader(_connectionDB))
+            {
+                await connection.ReadLineAsync();
+                while(!connection.EndOfStream)
+                {
+                    userData = connection.ReadLine().Split(';');
+                    if(userData[0] == email)
                     {
                         var user = new User{
                             Email = userData[0],

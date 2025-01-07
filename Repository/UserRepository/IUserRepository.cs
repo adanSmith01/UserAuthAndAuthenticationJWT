@@ -1,10 +1,11 @@
-using UserAuthenticationJWT.Model;
-namespace UserAuthenticationJWT.Repository;
+using UserAuthAndAuthenticationJWT.Models;
+namespace UserAuthAndAuthenticationJWT.Repository.UserRepository;
 
 public interface IUserRepository
 {
     Task<List<User>> GetAll();
-    Task<User> GetById(int userId);
+    Task<User> GetBy(int userId);
+    Task<User> GetBy(string email);
     Task Create(User newUser);
     Task Update(User userModified);
     Task Delete(int userId);
