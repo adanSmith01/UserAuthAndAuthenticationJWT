@@ -40,7 +40,7 @@ app.UseAuthorization();
 
 //Endpoints
 
-app.MapGet("/login", async ([FromServices]JWTService _jwtService, [FromBody]Login user) => 
+app.MapGet("/login", async ([FromServices]JWTService _jwtService, [FromBody]Login user, ILogger _logger) => 
 {
     try
     {
@@ -48,74 +48,112 @@ app.MapGet("/login", async ([FromServices]JWTService _jwtService, [FromBody]Logi
         if (jwt == null) return Results.Unauthorized();
         return Results.Ok(jwt);
     }
-    catch(FileNotFoundException)
+    catch(FileNotFoundException ex)
     {
+        _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
+    }
+    catch(Exception ex)
+    {
+        _logger.LogWarning(ex.ToString());
+        return Results.Problem(ex.Message);
     }
 });
 
-app.MapGet("/users", async (IUserRepository _userRepository) => {
+app.MapGet("/users", async (IUserRepository _userRepository, ILogger _logger) => {
     try
     {
         return Results.Ok(await _userRepository.GetAll());
     }
-    catch(FileNotFoundException)
+    catch(FileNotFoundException ex)
     {
+        _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
+    }
+    catch(Exception ex)
+    {
+        _logger.LogWarning(ex.ToString());
+        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
-app.MapGet("/users/{userId}", async (IUserRepository _userRepository, int userId) => {
+app.MapGet("/users/{userId}", async (IUserRepository _userRepository, int? userId, ILogger _logger) => {
     try
     {
-        User userFound = await _userRepository.GetBy(userId);
+        User userFound = await _userRepository.GetBy(userId ?? 0);
         if(userFound == null) return Results.NotFound("User not found");
 
         return Results.Ok(userFound);
     }
-    catch(FileNotFoundException)
+    catch(FileNotFoundException ex)
     {
-        return Results.Problem("Server error", statusCode: 500); 
+        _logger.LogInformation(ex.ToString());
+        return Results.Problem("Server error", statusCode: 500);
+    }
+    catch(Exception ex)
+    {
+        _logger.LogWarning(ex.ToString());
+        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
-app.MapPost("/users/create", async (IUserRepository _userRepository, User newUser) => {
+app.MapPost("/users/create", async (IUserRepository _userRepository, User newUser, ILogger _logger) => {
     try
     {
         await _userRepository.Create(newUser);
         return Results.NoContent();
     }
-    catch(FileNotFoundException)
+    catch(FileNotFoundException ex)
     {
+        _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
+    }
+    catch(Exception ex)
+    {
+        _logger.LogWarning(ex.ToString());
+        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
-app.MapPut("/users/update/{userId}", async (IUserRepository _userRepository, int userId, User userToUpdate) => {
+app.MapPut("/users/update/{userId}", async (IUserRepository _userRepository, int? userId, User userToUpdate, ILogger _logger) => {
     try
     {
-        if(await _userRepository.GetBy(userId) == null) return Results.NotFound($"Not exists user with ID:{int.MinValue}");
+        if(userId == null) return Results.BadRequest("ID cannot be null");
+        if(await _userRepository.GetBy(userId ?? 0) == null) return Results.NotFound($"Not exists user with ID:{int.MinValue}");
 
         await _userRepository.Update(userToUpdate);
         return Results.Ok("User updated successfully");
     }
-    catch(FileNotFoundException)
+    catch(FileNotFoundException ex)
     {
+        _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
+    }
+    catch(Exception ex)
+    {
+        _logger.LogWarning(ex.ToString());
+        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
-app.MapDelete("users/delete/{userId}", async (IUserRepository _userRepository, int userId) => {
+app.MapDelete("users/delete/{userId}", async (IUserRepository _userRepository, int? userId, ILogger _logger) => {
     try
     {
-        if(await _userRepository.GetBy(userId) == null) return Results.NotFound($"Not exists user with ID:{int.MinValue}");
+        if(userId == null) return Results.BadRequest("ID cannot be null");
+        if(await _userRepository.GetBy(userId ?? 0) == null) return Results.NotFound($"Not exists user with ID:{int.MinValue}");
 
-        await _userRepository.Delete(userId);
+        await _userRepository.Delete(userId ?? 0);
         return Results.Ok("User deleted successfully");
     }
-    catch(FileNotFoundException)
+    catch(FileNotFoundException ex)
     {
+        _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
+    }
+    catch(Exception ex)
+    {
+        _logger.LogWarning(ex.ToString());
+        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
