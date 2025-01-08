@@ -20,8 +20,6 @@ public class JWTService
 
     private async Task<User> UserAuthenticate(Login user)
     {
-        if(string.IsNullOrEmpty(user.Email)) return null;
-
         try
         {
             return await _userRepository.GetBy(user.Email);
