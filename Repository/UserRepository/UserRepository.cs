@@ -14,12 +14,16 @@ public class UserRepository: IUserRepository
             var users = new List<User>();
             string[] userData;
 
-            using(StreamReader connection = new StreamReader(_connectionDB))
+            using(FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using(StreamReader reader = new StreamReader(connection))
             {
-                await connection.ReadLineAsync();
-                while(!connection.EndOfStream)
+                await reader.ReadLineAsync();
+                string lineOfData;
+
+                while(!reader.EndOfStream)
                 {
-                    userData = connection.ReadLine().Split(';');
+                    lineOfData = await reader.ReadLineAsync();
+                    userData = lineOfData.Split(';');
                     users.Add(new User{
                         Email = userData[0],
                         Id = int.Parse(userData[1]),
@@ -35,20 +39,30 @@ public class UserRepository: IUserRepository
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
+        catch (Exception ex)
+        {
+            throw new Exception("An error occurred while listing users.", ex);
+        }
     }
 
-    public async Task<User> GetBy(int userId)
+    public async Task<User> GetBy(int? userId)
     {
         try
         {
             string[] userData;
 
-            using(StreamReader connection = new StreamReader(_connectionDB))
+            if(userId == null) throw new ArgumentException("ID cannot be null");
+
+            using(FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using(StreamReader reader = new StreamReader(connection))
             {
-                await connection.ReadLineAsync();
-                while(!connection.EndOfStream)
+                await reader.ReadLineAsync();
+                string lineOfData;
+
+                while(!reader.EndOfStream)
                 {
-                    userData = connection.ReadLine().Split(';');
+                    lineOfData = await reader.ReadLineAsync();
+                    userData = lineOfData.Split(';');
                     if(Convert.ToInt32(userData[1]) == userId)
                     {
                         var user = new User{
@@ -69,21 +83,30 @@ public class UserRepository: IUserRepository
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
+        catch (Exception ex)
+        {
+            throw new Exception("An error occurred while searching for the user.", ex);
+        }
     }
 
-    public async Task<User> GetBy(string email)
+    public async Task<User> GetBy(string userEmail)
     {
         try
         {
             string[] userData;
-
-            using(StreamReader connection = new StreamReader(_connectionDB))
+            if(string.IsNullOrEmpty(userEmail)) return null;
+            
+            using(FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using(StreamReader reader = new StreamReader(_connectionDB))
             {
-                await connection.ReadLineAsync();
-                while(!connection.EndOfStream)
+                await reader.ReadLineAsync();
+                string lineOfData;
+
+                while(!reader.EndOfStream)
                 {
-                    userData = connection.ReadLine().Split(';');
-                    if(userData[0] == email)
+                    lineOfData = await reader.ReadLineAsync();
+                    userData = lineOfData.Split(';');
+                    if(userData[0] == userEmail)
                     {
                         var user = new User{
                             Email = userData[0],
@@ -103,6 +126,10 @@ public class UserRepository: IUserRepository
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
+        catch (Exception ex)
+        {
+            throw new Exception("An error occurred while searching for the user.", ex);
+        }
     }
 
     public async Task Create(User newUser)
@@ -110,19 +137,24 @@ public class UserRepository: IUserRepository
         try
         {
             string newUserData;
-            using(StreamWriter connection = new StreamWriter(_connectionDB, true))
+            using(FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using(StreamWriter writer = new StreamWriter(connection))
             {
                 if(string.IsNullOrEmpty(newUser.Email) || string.IsNullOrEmpty(newUser.FirstName) || string.IsNullOrEmpty(newUser.LastName))
                 {
                     throw new Exception("There empty data");
                 }
                 newUserData = $"{newUser.Email};{new Random().Next(int.MaxValue)};{newUser.FirstName};{newUser.LastName}";
-                await connection.WriteLineAsync(newUserData);
+                await writer.WriteLineAsync(newUserData);
             }
         }
         catch(FileNotFoundException)
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
+        }
+        catch(Exception ex)
+        {
+            throw new Exception("An error occurred while creating the user.", ex);
         }
     }
 
@@ -132,16 +164,20 @@ public class UserRepository: IUserRepository
 
         try
         {
-            using (FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read))
-            using (StreamReader reader = new StreamReader(connection))
-            using (StreamWriter writer = new StreamWriter(tempDB, true))
+            if(string.IsNullOrEmpty(userToUpdate.Email) || string.IsNullOrEmpty(userToUpdate.FirstName) || string.IsNullOrEmpty(userToUpdate.LastName))
+            {
+                throw new Exception("There empty data");
+            }
+            using(FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using(StreamReader reader = new StreamReader(connection))
+            using(StreamWriter writer = new StreamWriter(tempDB, true))
             {
                 string line;
-                while ((line = await reader.ReadLineAsync()) != null)
+                while((line = await reader.ReadLineAsync()) != null)
                 {
                     var userToUpdateData = line.Split(";");
                     
-                    if (userToUpdateData.Length > 1 && 
+                    if(userToUpdateData.Length > 1 && 
                         int.TryParse(userToUpdateData[1], out int id) &&
                         id == userToUpdate.Id)
                     {
@@ -156,17 +192,17 @@ public class UserRepository: IUserRepository
             File.Delete(_connectionDB);
             File.Move(tempDB, _connectionDB);
         }
-        catch (FileNotFoundException)
+        catch(FileNotFoundException)
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             throw new Exception("An error occurred while updating the user.", ex);
         }
         finally
         {
-            if (File.Exists(tempDB))
+            if(File.Exists(tempDB))
             {
                 File.Delete(tempDB);
             }
@@ -174,22 +210,24 @@ public class UserRepository: IUserRepository
     }
 
 
-    public async Task Delete(int userId)
+    public async Task Delete(int? userId)
     {
         string tempDB = $"{_connectionDB}.tmp";
 
         try
         {
-            using (FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read))
-            using (StreamReader reader = new StreamReader(connection))
-            using (StreamWriter writer = new StreamWriter(tempDB, true))
+            if(userId == null) throw new ArgumentException("ID cannot be null");
+
+            using(FileStream connection = new FileStream(_connectionDB, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            using(StreamReader reader = new StreamReader(connection))
+            using(StreamWriter writer = new StreamWriter(tempDB, true))
             {
                 string line;
-                while ((line = await reader.ReadLineAsync()) != null)
+                while((line = await reader.ReadLineAsync()) != null)
                 {
                     var userToUpdateData = line.Split(";");
                     
-                    if (userToUpdateData.Length > 1 && 
+                    if(userToUpdateData.Length > 1 && 
                         int.TryParse(userToUpdateData[1], out int id) &&
                         id == userId)
                     {
@@ -201,17 +239,17 @@ public class UserRepository: IUserRepository
             File.Delete(_connectionDB);
             File.Move(tempDB, _connectionDB);
         }
-        catch (FileNotFoundException)
+        catch(FileNotFoundException)
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
-            throw new Exception("An error occurred while updating the user.", ex);
+            throw new Exception("An error occurred while deleting the user.", ex);
         }
         finally
         {
-            if (File.Exists(tempDB))
+            if(File.Exists(tempDB))
             {
                 File.Delete(tempDB);
             }
