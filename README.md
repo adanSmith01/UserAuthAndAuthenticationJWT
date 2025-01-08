@@ -11,13 +11,13 @@ This API shows how user authentication and authorization works using Json Web To
 
 ## Packages
 
-To configure the validation of JWTs
+To configure JWT validation
 ```
 dotnet add package Microsoft.AspNetCore.Authentication.JWTBearer --version 8.0.11
 ```
 
 
-To create and management JWTs
+To create JWT
 ```
 dotnet add package Microsoft.IdentityModel.JsonWebTokens --version 8.3.0
 ```
