@@ -97,7 +97,7 @@ app.MapGet("/users/{userId}", async (IUserRepository _userRepository, int? userI
     }
 }).RequireAuthorization();
 
-app.MapPost("/users/create", async (IUserRepository _userRepository, User newUser, ILogger _logger) => {
+app.MapPost("/users/", async (IUserRepository _userRepository, User newUser, ILogger _logger) => {
     try
     {
         await _userRepository.Create(newUser);
@@ -115,7 +115,7 @@ app.MapPost("/users/create", async (IUserRepository _userRepository, User newUse
     }
 }).RequireAuthorization();
 
-app.MapPut("/users/update/{userId}", async (IUserRepository _userRepository, int? userId, User userToUpdate, ILogger _logger) => {
+app.MapPut("/users/{userId}", async (IUserRepository _userRepository, int? userId, User userToUpdate, ILogger _logger) => {
     try
     {
         if(userId == null) return Results.BadRequest("ID cannot be null");
@@ -136,7 +136,7 @@ app.MapPut("/users/update/{userId}", async (IUserRepository _userRepository, int
     }
 }).RequireAuthorization();
 
-app.MapDelete("users/delete/{userId}", async (IUserRepository _userRepository, int? userId, ILogger _logger) => {
+app.MapDelete("users/{userId}", async (IUserRepository _userRepository, int? userId, ILogger _logger) => {
     try
     {
         if(userId == null) return Results.BadRequest("ID cannot be null");
