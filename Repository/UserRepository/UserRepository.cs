@@ -39,10 +39,6 @@ public class UserRepository: IUserRepository
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
-        catch (Exception ex)
-        {
-            throw new Exception("An error occurred while listing users.", ex);
-        }
     }
 
     public async Task<User> GetBy(int? userId)
@@ -83,10 +79,6 @@ public class UserRepository: IUserRepository
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
-        catch (Exception ex)
-        {
-            throw new Exception("An error occurred while searching for the user.", ex);
-        }
     }
 
     public async Task<User> GetBy(string userEmail)
@@ -126,10 +118,6 @@ public class UserRepository: IUserRepository
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
         }
-        catch (Exception ex)
-        {
-            throw new Exception("An error occurred while searching for the user.", ex);
-        }
     }
 
     public async Task Create(User newUser)
@@ -151,10 +139,6 @@ public class UserRepository: IUserRepository
         catch(FileNotFoundException)
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
-        }
-        catch(Exception ex)
-        {
-            throw new Exception("An error occurred while creating the user.", ex);
         }
     }
 
@@ -195,10 +179,6 @@ public class UserRepository: IUserRepository
         catch(FileNotFoundException)
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
-        }
-        catch(Exception ex)
-        {
-            throw new Exception("An error occurred while updating the user.", ex);
         }
         finally
         {
@@ -242,10 +222,6 @@ public class UserRepository: IUserRepository
         catch(FileNotFoundException)
         {
             throw new FileNotFoundException($"Not exists file '{_connectionDB}' ");
-        }
-        catch(Exception ex)
-        {
-            throw new Exception("An error occurred while deleting the user.", ex);
         }
         finally
         {

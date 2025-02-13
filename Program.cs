@@ -53,11 +53,6 @@ app.MapGet("/login", async ([FromServices]JWTService _jwtService, [FromBody]Logi
         _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
     }
-    catch(Exception ex)
-    {
-        _logger.LogWarning(ex.ToString());
-        return Results.Problem(ex.Message);
-    }
 });
 
 app.MapGet("/users", async (IUserRepository _userRepository, ILogger _logger) => {
@@ -69,11 +64,6 @@ app.MapGet("/users", async (IUserRepository _userRepository, ILogger _logger) =>
     {
         _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
-    }
-    catch(Exception ex)
-    {
-        _logger.LogWarning(ex.ToString());
-        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
@@ -90,11 +80,6 @@ app.MapGet("/users/{userId}", async (IUserRepository _userRepository, int? userI
         _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
     }
-    catch(Exception ex)
-    {
-        _logger.LogWarning(ex.ToString());
-        return Results.Problem(ex.Message);
-    }
 }).RequireAuthorization();
 
 app.MapPost("/users/", async (IUserRepository _userRepository, User newUser, ILogger _logger) => {
@@ -107,11 +92,6 @@ app.MapPost("/users/", async (IUserRepository _userRepository, User newUser, ILo
     {
         _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
-    }
-    catch(Exception ex)
-    {
-        _logger.LogWarning(ex.ToString());
-        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
@@ -129,11 +109,6 @@ app.MapPut("/users/{userId}", async (IUserRepository _userRepository, int? userI
         _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
     }
-    catch(Exception ex)
-    {
-        _logger.LogWarning(ex.ToString());
-        return Results.Problem(ex.Message);
-    }
 }).RequireAuthorization();
 
 app.MapDelete("users/{userId}", async (IUserRepository _userRepository, int? userId, ILogger _logger) => {
@@ -149,11 +124,6 @@ app.MapDelete("users/{userId}", async (IUserRepository _userRepository, int? use
     {
         _logger.LogInformation(ex.ToString());
         return Results.Problem("Server error", statusCode: 500);
-    }
-    catch(Exception ex)
-    {
-        _logger.LogWarning(ex.ToString());
-        return Results.Problem(ex.Message);
     }
 }).RequireAuthorization();
 
